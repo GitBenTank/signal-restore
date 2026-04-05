@@ -16,7 +16,7 @@ const KEYWORD_WEIGHT = 1;
 const ANCHOR_WEIGHT = 2;
 
 /** Weighted score needed before any pattern is trusted. */
-const MIN_PATTERN_SCORE = 5;
+const MIN_PATTERN_SCORE = 4;
 
 /** If the runner-up is this close (in weighted points), treat the match as ambiguous. */
 const AMBIGUITY_MARGIN = 2;

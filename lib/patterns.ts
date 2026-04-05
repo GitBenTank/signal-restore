@@ -192,6 +192,7 @@ export const REFLECTION_PATTERNS: readonly Pattern[] = [
       "shouldn't have",
       "shouldnt have",
       "feel bad",
+      "that conversation",
     ],
     anchors: [
       "how i handled",
