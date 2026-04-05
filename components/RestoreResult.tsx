@@ -9,31 +9,45 @@ type RestoreResultProps = {
   onRescan: () => void;
 };
 
-function strengthLabel(s: SignalStrength): string {
+/** User-facing copy only — internal `SignalStrength` values unchanged. */
+function strengthDisplayLabel(s: SignalStrength, patternId: string): string {
+  if (patternId === "fallback") {
+    return "pattern not named";
+  }
   switch (s) {
     case "low":
-      return "low";
+      return "early signal";
     case "moderate":
-      return "moderate";
+      return "clear signal";
     case "strong":
-      return "strong";
+      return "strong signal";
     default:
       return s;
   }
 }
 
-function strengthClarifierLow(s: SignalStrength): string | null {
-  return s === "low" ? "insufficient clarity" : null;
+function strengthSubtitle(s: SignalStrength, patternId: string): string | null {
+  if (patternId === "fallback") {
+    return "signal stayed mixed or thin — nothing forced";
+  }
+  if (s === "low") {
+    return "present, but not fully formed";
+  }
+  return null;
 }
 
 export function RestoreResult({ result, onRestart, onRescan }: RestoreResultProps) {
   const [copied, setCopied] = useState(false);
 
-  const strengthLowNote = strengthClarifierLow(result.signalStrength);
+  const strengthLine1 = strengthDisplayLabel(
+    result.signalStrength,
+    result.patternId,
+  );
+  const strengthLine2 = strengthSubtitle(result.signalStrength, result.patternId);
   const strengthForCopy =
-    strengthLowNote != null
-      ? `${strengthLabel(result.signalStrength)}\n(${strengthLowNote})`
-      : strengthLabel(result.signalStrength);
+    strengthLine2 != null
+      ? `${strengthLine1}\n(${strengthLine2})`
+      : strengthLine1;
 
   const textParts = [
     "[RESTORE RESULT]",
@@ -126,10 +140,10 @@ export function RestoreResult({ result, onRestart, onRescan }: RestoreResultProp
                 Signal strength
               </dt>
               <dd className="text-amber-400/88">
-                <span className="tabular-nums">{strengthLabel(result.signalStrength)}</span>
-                {strengthLowNote != null && (
+                <span className="tabular-nums">{strengthLine1}</span>
+                {strengthLine2 != null && (
                   <span className="mt-1.5 block text-sm font-normal normal-case tracking-normal text-emerald-600/80">
-                    ({strengthLowNote})
+                    ({strengthLine2})
                   </span>
                 )}
               </dd>
