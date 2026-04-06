@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-04-05 — System sweep: surface vs pattern mismatch + interview stress
+
+**Problem:** `inferSurfaceNamed` could show a sharp label (e.g. “Nerves about what’s next”) while `pickBestPattern` returned **fallback**, because **uncertainty** lexicon missed common phrases (`stress`, `worried about`, etc.) and scores stopped at **3** vs **MIN 4**.
+
+**Engine (trust-preserving):**
+
+- `lib/patterns.ts` — **uncertainty**: keywords `stress`, `stressed`, `pressure`, `tomorrow`, `tonight`; anchors `worried about`, `stressed about`, `nervous about`.
+- `lib/analyzer.ts` — `MIN_PATTERN_SCORE` **4 → 3**; `AMBIGUITY_MARGIN` **2 → 1**; `SHORT_VAGUE_SCORE_CAP` **4 → 2** so **short + vague** sessions cannot clear the minimum while longer clear text still can.
+- **Fallback copy:** when the surface label is **not** one of the three generic bedrock strings, **`suggest`** is bridged to acknowledge what they named before explaining why no single pattern was pinned.
+
+**Regression:** `npx tsx scripts/final-qa-ten.ts`, `npx tsx scripts/hotfix-five-tests.ts`
+
+---
+
 ## 2026-04-05 — Production hotfix (over-fallback)
 
 **Why:** Real reflections were falling back too often; vague one-liners should still hold back.

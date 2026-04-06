@@ -16,17 +16,17 @@ const KEYWORD_WEIGHT = 1;
 const ANCHOR_WEIGHT = 2;
 
 /** Weighted score needed before any pattern is trusted. */
-const MIN_PATTERN_SCORE = 4;
+const MIN_PATTERN_SCORE = 3;
 
 /** If the runner-up is this close (in weighted points), treat the match as ambiguous. */
-const AMBIGUITY_MARGIN = 2;
+const AMBIGUITY_MARGIN = 1;
 
 /** Runner-up must be at least this strong for ambiguity to apply. */
 const RUNNER_UP_FLOOR = 3;
 
 /** When total reflection is very short and vague-shaped, cap pattern scores below MIN_PATTERN_SCORE. */
 const SHORT_VAGUE_WORD_THRESHOLD = 5;
-const SHORT_VAGUE_SCORE_CAP = 4;
+const SHORT_VAGUE_SCORE_CAP = 2;
 
 const FALLBACK: Omit<AnalysisResult, "surfaceNamed" | "signalStrength"> = {
   patternId: "fallback",
@@ -37,6 +37,20 @@ const FALLBACK: Omit<AnalysisResult, "surfaceNamed" | "signalStrength"> = {
   tryNext:
     "Try again with fewer adjectives: what happened, who was involved, and what bothered you most in plain language.",
 };
+
+/** First-answer labels that are intentionally generic—keep default fallback copy. */
+const GENERIC_SURFACE_NAMED = new Set([
+  "Something unnamed, for now",
+  "Tension not fully labeled yet",
+  "A hard-to-name ‘off’ feeling",
+]);
+
+function fallbackSuggestForSurface(surfaceNamed: string): string {
+  if (GENERIC_SURFACE_NAMED.has(surfaceNamed)) {
+    return FALLBACK.suggest;
+  }
+  return `${surfaceNamed} comes through in what you shared. Even so, the full reflection didn’t settle on one pattern underneath—the signal stayed mixed or soft, or more than one honest thread is in play. Nothing below forces a single label on purpose.`;
+}
 
 const SURFACE_RULES: ReadonlyArray<{
   keywords: readonly string[];
@@ -330,6 +344,7 @@ export function analyzeReflection(answers: readonly string[]): AnalysisResult {
     return {
       surfaceNamed,
       ...FALLBACK,
+      suggest: fallbackSuggestForSurface(surfaceNamed),
       signalStrength: "low",
       ...(directionalHints.length > 0 ? { directionalHints } : {}),
     };
